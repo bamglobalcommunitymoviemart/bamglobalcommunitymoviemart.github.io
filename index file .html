@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BGC Movie Mart • BammybestowedTV Playlist</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#070707;color:#f4f0e8;font-family:Inter,Arial,sans-serif}
+header{padding:28px 5vw 20px;background:linear-gradient(180deg,#101010,#080808);border-bottom:1px solid #2a2419;position:sticky;top:0;z-index:5}
+.brand{display:flex;gap:14px;align-items:center}.logo{width:48px;height:48px;border:1px solid #c9a44c;border-radius:50%;display:grid;place-items:center;color:#c9a44c;font-weight:800;font-size:12px}h1{margin:0;font-size:clamp(22px,4vw,38px);letter-spacing:.04em}.sub{color:#b9b09f;font-size:12px;letter-spacing:.14em;margin-top:4px}
+.search{margin-top:18px;display:flex;gap:10px}input{flex:1;background:#111;border:1px solid #383126;color:#fff;border-radius:10px;padding:13px 15px;outline:none}button{border:1px solid #9d7b2e;background:#17130b;color:#e9d18a;border-radius:10px;padding:10px 14px;cursor:pointer}button.active{background:#c9a44c;color:#0b0b0b;font-weight:700}
+main{padding:24px 5vw 60px}.notice{border:1px solid #3a3020;background:#100e0a;border-radius:12px;padding:12px 14px;color:#cfc3ac;font-size:13px;margin-bottom:18px}
+.shelves{display:flex;gap:8px;overflow:auto;padding-bottom:8px;margin-bottom:24px}.shelves button{white-space:nowrap}
+h2{font-size:20px;margin:24px 0 12px}.count{color:#a99f8e;font-size:12px;font-weight:400}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.card{background:#101010;border:1px solid #252018;border-radius:12px;overflow:hidden;transition:.18s;display:flex;flex-direction:column}.card:hover{transform:translateY(-2px);border-color:#8f712c}
+.poster{aspect-ratio:2/3;background:linear-gradient(145deg,#191612,#090909);display:grid;place-items:center;position:relative;overflow:hidden}.poster img{width:100%;height:100%;object-fit:cover;display:block}.poster .ph{color:#8f8779;text-align:center;padding:16px;font-size:12px}
+.body{padding:12px}.title{font-weight:700;font-size:14px;line-height:1.3;min-height:36px}.meta{font-size:11px;color:#a69c8b;margin:7px 0 10px}.watch{width:100%;padding:9px 8px;font-size:12px}
+.empty{padding:30px;text-align:center;color:#9f9687;border:1px dashed #3a3226;border-radius:12px}
+.small{font-size:11px;color:#756d61;margin-top:10px;line-height:1.5}
+@media(max-width:520px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}main{padding-left:4vw;padding-right:4vw}header{padding-left:4vw;padding-right:4vw}}
+</style>
+</head>
+<body>
+
+<section id="bgcApiSetup" style="margin:18px auto;max-width:1100px;padding:18px;border:1px solid rgba(212,175,55,.35);border-radius:16px;background:#101010;color:#fff">
+  <div style="font-size:11px;letter-spacing:1.8px;color:#d4af37;font-weight:800">LIVE PLAYLIST SOURCE</div>
+  <div style="font-size:24px;font-weight:850;margin:4px 0 4px">BammybestowedTV</div>
+  <div style="font-size:12px;color:#aaa;margin-bottom:14px">BGC Movie Mart reads the public YouTube playlist and can refresh when new movies are added.</div>
+  <div style="display:flex;gap:9px;flex-wrap:wrap">
+    <input id="bgcApiKey" type="password" autocomplete="off" placeholder="Paste your YouTube API key"
+      style="flex:1;min-width:250px;padding:12px 14px;border-radius:10px;border:1px solid #444;background:#181818;color:#fff;outline:none">
+    <button id="bgcConnect" type="button" style="padding:12px 18px;border:0;border-radius:10px;background:#d4af37;color:#111;font-weight:800">Connect</button>
+    <button id="bgcRefresh" type="button" style="padding:12px 18px;border:1px solid #555;border-radius:10px;background:#181818;color:#fff;font-weight:800">Refresh Playlist</button>
+  </div>
+  <div id="bgcApiStatus" style="margin-top:10px;font-size:12px;color:#aaa">API key not connected yet.</div>
+</section>
+
+<header>
+<div class="brand"><div class="logo">BGC</div><div><h1>BAM GLOBAL COMMUNITY</h1><div class="sub">MOVIE MART • POWERED BY BAMMYBESTOWEDTV PLAYLIST</div></div></div>
+<div class="search"><input id="search" placeholder="Search movies..."><button id="refresh">↻ Refresh</button></div>
+</header>
+<main>
+<div class="notice" id="status">Playlist source: <b>BammybestowedTV</b> • Loading live playlist…</div>
+<div class="shelves" id="filters"></div>
+<section><h2 id="heading">ALL MOVIES <span class="count" id="count"></span></h2><div class="grid" id="grid"></div></section>
+<div class="small">The playlist is the master source. When BammybestowedTV adds a movie to the playlist, the live catalogue can pick it up on refresh. Supplied BGC posters can later override YouTube thumbnails.</div>
+</main>
+<script>
+const PLAYLIST_ID = "PL_YIUdubpCx2VlRuA42PSEv6G_siiP4Df";
+let API_KEY = localStorage.getItem("bgc_youtube_api_key") || "";
+const FALLBACK = [{"title": "Lost Connection", "videoId": "", "genres": ["Drama"], "fallback": true, "position": 0}, {"title": "Second Chances", "videoId": "", "genres": ["Drama"], "fallback": true, "position": 1}, {"title": "Kiss Me Tomorrow", "videoId": "", "genres": ["Romance"], "fallback": true, "position": 2}, {"title": "To Love a Williams", "videoId": "", "genres": ["Romance"], "fallback": true, "position": 3}, {"title": "The House Manager", "videoId": "", "genres": ["Family"], "fallback": true, "position": 4}, {"title": "Meadowbrook Hearts: The Transition", "videoId": "", "genres": ["Drama"], "fallback": true, "position": 5}, {"title": "The Anchor", "videoId": "", "genres": ["Drama"], "fallback": true, "position": 6}, {"title": "A Flicker of Us", "videoId": "", "genres": ["Drama"], "fallback": true, "position": 7}, {"title": "Without You", "videoId": "", "genres": ["Romance"], "fallback": true, "position": 8}, {"title": "Same Difference", "videoId": "", "genres": ["Romance"], "fallback": true, "position": 9}, {"title": "Double the Love", "videoId": "", "genres": ["Romance", "Comedy"], "fallback": true, "position": 10}, {"title": "Last Dial to Heaven", "videoId": "", "genres": ["Family"], "fallback": true, "position": 11}, {"title": "Love Unbroken", "videoId": "", "genres": ["Romance"], "fallback": true, "position": 12}, {"title": "A Bride for Season", "videoId": "", "genres": ["Romance", "Comedy"], "fallback": true, "position": 13}, {"title": "Walls Between Us", "videoId": "", "genres": ["Drama"], "fallback": true, "position": 14}, {"title": "Three for Trouble", "videoId": "", "genres": ["Comedy"], "fallback": true, "position": 15}, {"title": "The Gift Within", "videoId": "", "genres": ["Family"], "fallback": true, "position": 16}, {"title": "Miracle Man", "videoId": "", "genres": ["Family"], "fallback": true, "position": 17}, {"title": "Love in Every Word 2: The Wedding", "videoId": "", "genres": ["Romance"], "fallback": true, "position": 18}, {"title": "Meadowbrook Hearts", "videoId": "", "genres": ["Drama"], "fallback": true, "position": 19}, {"title": "Chess", "videoId": "", "genres": ["Thriller"], "fallback": true, "position": 20}, {"title": "One Night Only", "videoId": "", "genres": ["Thriller"], "fallback": true, "position": 21}, {"title": "Love Aside", "videoId": "", "genres": ["Romance"], "fallback": true, "position": 22}, {"title": "The Price We Pay", "videoId": "", "genres": ["Drama"], "fallback": true, "position": 23}, {"title": "The Gift", "videoId": "", "genres": ["Drama"], "fallback": true, "position": 24}, {"title": "Drive Me to Love", "videoId": "", "genres": ["Romance", "Comedy"], "fallback": true, "position": 25}, {"title": "Karma Says", "videoId": "", "genres": ["Drama", "Thriller"], "fallback": true, "position": 26}, {"title": "Too Good to Be True", "videoId": "", "genres": ["Romance"], "fallback": true, "position": 27}, {"title": "Temptation", "videoId": "", "genres": ["Thriller"], "fallback": true, "position": 28}, {"title": "Wrong Door", "videoId": "", "genres": ["Drama", "Thriller"], "fallback": true, "position": 29}, {"title": "A Copy of Love", "videoId": "", "genres": ["Romance", "Comedy"], "fallback": true, "position": 30}, {"title": "Whispers of the Womb", "videoId": "", "genres": ["Drama"], "fallback": true, "position": 31}, {"title": "The Silent Truth", "videoId": "", "genres": ["Drama", "Thriller"], "fallback": true, "position": 32}, {"title": "For His Love", "videoId": "", "genres": ["Romance"], "fallback": true, "position": 33}, {"title": "Twin Deception", "videoId": "", "genres": ["Drama", "Thriller"], "fallback": true, "position": 34}, {"title": "The Word", "videoId": "", "genres": ["Drama"], "fallback": true, "position": 35}, {"title": "The More You Look", "videoId": "", "genres": ["Romance", "Thriller"], "fallback": true, "position": 36}, {"title": "Love in Every Word", "videoId": "", "genres": ["Romance"], "fallback": true, "position": 37}, {"title": "Cupcake for Val", "videoId": "", "genres": ["Romance", "Comedy"], "fallback": true, "position": 38}, {"title": "Ogechi", "videoId": "", "genres": ["Family"], "fallback": true, "position": 39}, {"title": "Merry Side of You", "videoId": "", "genres": ["Romance", "Comedy"], "fallback": true, "position": 40}, {"title": "Ingrate / Deza the Great", "videoId": "", "genres": ["Thriller"], "fallback": true, "position": 41}, {"title": "Seasoned with Love", "videoId": "", "genres": ["Romance", "Comedy"], "fallback": true, "position": 42}, {"title": "Love, Style and Other Things", "videoId": "", "genres": ["Romance", "Comedy"], "fallback": true, "position": 43}, {"title": "Betting on Love", "videoId": "", "genres": ["Romance"], "fallback": true, "position": 44}, {"title": "Entangled", "videoId": "", "genres": ["Family"], "fallback": true, "position": 45}, {"title": "A Case for the Heart", "videoId": "", "genres": ["Romance"], "fallback": true, "position": 46}];
+const GENRE_MAP = {"Romance": ["Kiss Me Tomorrow", "To Love a Williams", "Without You", "Same Difference", "Double the Love", "Love Unbroken", "A Bride for Season", "Love in Every Word 2: The Wedding", "Love Aside", "Drive Me to Love", "Too Good to Be True", "A Copy of Love", "For His Love", "The More You Look", "Love in Every Word", "Cupcake for Val", "Merry Side of You", "Seasoned with Love", "Love, Style and Other Things", "Betting on Love", "A Case for the Heart"], "Drama": ["Lost Connection", "Second Chances", "Meadowbrook Hearts", "Meadowbrook Hearts: The Transition", "The Anchor", "A Flicker of Us", "Walls Between Us", "The Price We Pay", "The Gift", "Karma Says", "Whispers of the Womb", "The Silent Truth", "Twin Deception", "The Word", "Wrong Door"], "Comedy": ["Three for Trouble", "Double the Love", "A Bride for Season", "Drive Me to Love", "A Copy of Love", "Cupcake for Val", "Merry Side of You", "Seasoned with Love", "Love, Style and Other Things"], "Thriller": ["Chess", "One Night Only", "Temptation", "Wrong Door", "Karma Says", "The Silent Truth", "Twin Deception", "The More You Look", "Ingrate / Deza the Great"], "Family": ["The House Manager", "Last Dial to Heaven", "The Gift Within", "Miracle Man", "Ogechi", "Entangled"]};
+const PICKS = ["To Love a Williams", "Meadowbrook Hearts", "Meadowbrook Hearts: The Transition", "Love in Every Word", "Love in Every Word 2: The Wedding", "Without You", "The Anchor", "A Case for the Heart", "Too Good to Be True", "Seasoned with Love"];
+let items = [], active = "ALL MOVIES";
+
+function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function classify(title){
+  const t=title.toLowerCase();
+  const found=[];
+  for(const [g,arr] of Object.entries(GENRE_MAP)) if(arr.some(x=>x.toLowerCase()===t)) found.push(g);
+  return found.length?found:["DRAMA"];
+}
+function thumb(videoId){return videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : "";}
+function watch(videoId){return videoId ? `https://www.youtube.com/watch?v=${videoId}&list=${PLAYLIST_ID}` : `https://www.youtube.com/playlist?list=${PLAYLIST_ID}`;}
+function render(){
+  const q=document.getElementById("search").value.trim().toLowerCase();
+  let list=items.filter(x=>!q || x.title.toLowerCase().includes(q));
+  if(active==="NEW RELEASES") list=list.slice(0,13);
+  else if(active==="BGC PICKS") list=list.filter(x=>PICKS.some(p=>p.toLowerCase()===x.title.toLowerCase()));
+  else if(active!=="ALL MOVIES") list=list.filter(x=>x.genres.includes(active));
+  document.getElementById("count").textContent=`(${list.length})`;
+  const grid=document.getElementById("grid");
+  if(!list.length){grid.innerHTML='<div class="empty">No movies found.</div>';return;}
+  grid.innerHTML=list.map(x=>`<article class="card"><div class="poster">${x.videoId?`<img src="${thumb(x.videoId)}" alt="${esc(x.title)}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">`:''}<div class="ph" style="${x.videoId?'display:none':''}">Poster will be added from supplied artwork</div></div><div class="body"><div class="title">${esc(x.title)}</div><div class="meta">${esc(x.genres.join(" • "))} • FREE ON YOUTUBE</div><button class="watch" onclick="window.open('${watch(x.videoId)}','_blank')">WATCH NOW</button></div></article>`).join("");
+}
+function filters(){
+ const fs=["ALL MOVIES","NEW RELEASES","BGC PICKS","ROMANCE","DRAMA","COMEDY","THRILLER","FAMILY"];
+ document.getElementById("filters").innerHTML=fs.map(x=>`<button class="${active===x?'active':''}" data-f="${x}">${x}</button>`).join("");
+ document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{active=b.dataset.f;filters();render();});
+}
+async function loadLive(){
+ document.getElementById("status").innerHTML="Connecting to the BammybestowedTV playlist…";
+ if(API_KEY==="YOUR_YOUTUBE_DATA_API_KEY"){
+   items=FALLBACK.map(x=>({...x}));
+   document.getElementById("status").innerHTML="Playlist source set to <b>BammybestowedTV</b>. Live sync is ready; add a YouTube Data API key to make the catalogue automatically read new playlist additions.";
+   filters();render();return;
+ }
+ let pageToken="";
+ const out=[];
+ try{
+   do{
+     const url=`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&maxResults=50&playlistId=${PLAYLIST_ID}&key=${API_KEY}${pageToken?'&pageToken='+pageToken:''}`;
+     const r=await fetch(url); if(!r.ok) throw new Error("YouTube API request failed");
+     const d=await r.json();
+     (d.items||[]).forEach((v,i)=>{
+       const title=v.snippet?.title||"Untitled";
+       const vid=v.contentDetails?.videoId||v.snippet?.resourceId?.videoId||"";
+       out.push({title,videoId:vid,genres:classify(title),position:v.snippet?.position??i,addedAt:v.snippet?.publishedAt||""});
+     });
+     pageToken=d.nextPageToken||"";
+   }while(pageToken);
+   items=out.sort((a,b)=>a.position-b.position);
+   document.getElementById("status").innerHTML=`Live playlist connected: <b>BammybestowedTV</b> • ${items.length} movie(s) loaded • updates whenever you refresh the catalogue.`;
+ }catch(e){
+   items=FALLBACK.map(x=>({...x}));
+   document.getElementById("status").innerHTML="Live playlist connection failed, so the saved catalogue is being shown. Check the API key/configuration.";
+ }
+ filters();render();
+}
+document.getElementById("search").addEventListener("input",render);
+document.getElementById("refresh").addEventListener("click",loadLive);
+loadLive();
+</script>
+
+<script>
+(function(){
+  const PLAYLIST_ID = "PL_YIUdubpCx2VlRuA42PSEv6G_siiP4Df";
+  const input = document.getElementById("bgcApiKey");
+  const connect = document.getElementById("bgcConnect");
+  const refresh = document.getElementById("bgcRefresh");
+  const status = document.getElementById("bgcApiStatus");
+  if (!input || !connect || !refresh) return;
+
+  const saved = localStorage.getItem("bgc_youtube_api_key") || "";
+  if (saved) {
+    input.value = saved;
+    status.textContent = "API key saved in this browser. Ready to refresh BammybestowedTV.";
+  }
+
+  function esc(s){
+    return String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  async function getAllPlaylistItems(key){
+    let pageToken = "";
+    const items = [];
+    do {
+      const url = new URL("https://www.googleapis.com/youtube/v3/playlistItems");
+      url.searchParams.set("part", "snippet,contentDetails");
+      url.searchParams.set("playlistId", PLAYLIST_ID);
+      url.searchParams.set("maxResults", "50");
+      url.searchParams.set("key", key);
+      if (pageToken) url.searchParams.set("pageToken", pageToken);
+      const r = await fetch(url.toString());
+      const data = await r.json();
+      if (!r.ok || data.error) {
+        const msg = data?.error?.message || ("YouTube API error " + r.status);
+        throw new Error(msg);
+      }
+      items.push(...(data.items || []));
+      pageToken = data.nextPageToken || "";
+    } while(pageToken);
+    return items;
+  }
+
+  function findGrid(){
+    return document.querySelector(".movie-grid, #movieGrid, .movies-grid, .grid");
+  }
+
+  function renderApiResults(items){
+    const grid = findGrid();
+    if (!grid) return false;
+
+    // Only rebuild if the page's movie-card structure is present.
+    const hasCards = grid.querySelector(".movie-card, article, .card");
+    if (!hasCards) return false;
+
+    grid.innerHTML = items.map((it, i) => {
+      const s = it.snippet || {};
+      const title = s.title || "Untitled";
+      const thumb = s.thumbnails?.high?.url || s.thumbnails?.medium?.url || s.thumbnails?.default?.url || "";
+      const vid = it.contentDetails?.videoId || "";
+      const watch = vid ? "https://www.youtube.com/watch?v=" + encodeURIComponent(vid) : "https://www.youtube.com/playlist?list=" + PLAYLIST_ID;
+      const date = s.publishedAt ? new Date(s.publishedAt).toLocaleDateString() : "";
+      return `<article class="movie-card" data-title="${esc(title.toLowerCase())}">
+        <div class="poster-wrap">
+          ${thumb ? `<img class="poster" src="${esc(thumb)}" alt="${esc(title)} poster" loading="lazy">` : `<div class="poster" style="display:flex;align-items:center;justify-content:center;padding:20px;text-align:center">BammybestowedTV</div>`}
+        </div>
+        <div class="movie-info">
+          <h3>${esc(title)}</h3>
+          <div class="movie-meta"><span>FREE ON YOUTUBE</span>${date ? `<span>${esc(date)}</span>` : ""}</div>
+          <a class="watch-btn" href="${esc(watch)}" target="_blank" rel="noopener">WATCH NOW</a>
+        </div>
+      </article>`;
+    }).join("");
+    return true;
+  }
+
+  async function refreshPlaylist(){
+    const key = (localStorage.getItem("bgc_youtube_data_api_key") || input.value || "").trim();
+    if (!key) {
+      status.textContent = "Paste your YouTube API key first.";
+      return;
+    }
+    API_KEY = key;
+    localStorage.setItem("bgc_youtube_api_key", key);
+    localStorage.setItem("bgc_youtube_data_api_key", key);
+    status.textContent = "Connecting to BammybestowedTV playlist…";
+    try {
+      const items = await getAllPlaylistItems(key);
+      const usable = items.filter(x => x.snippet && x.snippet.title && x.contentDetails?.videoId);
+      const rendered = renderApiResults(usable);
+      status.textContent = `Connected ✓ ${usable.length} playlist movie${usable.length === 1 ? "" : "s"} loaded from BammybestowedTV.`;
+      if (!rendered) {
+        // Still succeed: the existing catalogue remains visible, while links can
+        // be refreshed by the page's own code on the next version.
+        console.info("Playlist loaded:", usable);
+      }
+    } catch (e) {
+      console.error(e);
+      status.textContent = "Could not load the playlist: " + e.message;
+    }
+  }
+
+  connect.addEventListener("click", refreshPlaylist);
+  refresh.addEventListener("click", refreshPlaylist);
+})();
+</script>
+
+</body></html>
