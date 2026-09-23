@@ -3,7 +3,7 @@ name: Update YouTube Movie Catalogue
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "17 * * * *"
 
 permissions:
   contents: write
@@ -30,6 +30,108 @@ jobs:
           playlist_id = "PL_YIUdubpCx2VlRuA42PSEv6G_siiP4Df"
           api_key = os.environ["YOUTUBE_API_KEY"]
 
+          title_map = {
+              "GrxitJ4fHT8": "BOWALE",
+              "DhTG5hSFUvw": "LOST CONNECTION",
+              "4L1xY-tSOCw": "SECOND CHANCES",
+              "Ud1JUpJZZGQ": "KISS ME TOMORROW",
+              "o1TNBdyrUbY": "TO LOVE A WILLIAMS",
+              "srH_cKp_9CQ": "THE HOUSE MANAGER",
+              "T4rIpXveUxM": "MEADOWBROOK HEARTS: THE TRANSITION",
+              "3oKgYl34ES4": "THE ANCHOR",
+              "1Euf5dSqdrY": "A FLICKER OF US",
+              "061B3-yAkSM": "WITHOUT YOU",
+              "gP8wqJbM7_g": "SAME DIFFERENCE",
+              "-r63J6ZtnB8": "DOUBLE THE LOVE",
+              "1RgvumvDiM8": "LAST DIAL TO HEAVEN",
+              "HiGnOF8B9s0": "LOVE UNBROKEN",
+              "VooG7LMBMak": "A BRIDE FOR THE SEASON",
+              "nNBISa5Znc0": "WALLS BETWEEN US",
+              "FRsfW3cpi-c": "THREE FOR TROUBLE",
+              "_uqFACWPpDg": "THE GIFT WITHIN",
+              "eF_SNXUtAOs": "MIRACLE MAN",
+              "OQQaDqLCgKg": "LOVE IN EVERY WORD 2: THE WEDDING",
+              "YxSkTZ756Yc": "MEADOWBROOK HEARTS",
+              "nPpy24gr12M": "CHESS",
+              "0KSSYOa2Lvw": "ONE NIGHT ONLY",
+              "htzdkMPBq1g": "LOVE ASIDE",
+              "G12jLjOusAs": "THE PRICE WE PAY",
+              "Ps9nVGyQJdA": "THE GIFT",
+              "go7D8Egeyu0": "DRIVE ME TO LOVE",
+              "rY92l-9ITx4": "KARMA SAYS",
+              "RMIGESdOEKU": "TOO GOOD TO BE TRUE",
+              "lAve8eRTUuI": "TEMPTATION",
+              "BHJQYbd88hc": "WRONG DOOR",
+              "9zpYWyDRigI": "A COPY OF LOVE",
+              "neFmomPVpug": "WHISPERS OF THE WOMB",
+              "1wx57M0Y4pQ": "THE SILENT TRUTH",
+              "OhAefewxC4o": "FOR HIS LOVE",
+              "GwwLna5zxpk": "TWIN DECEPTION",
+              "TTxt0QhaMTo": "THE WORD",
+              "FKxZ_h8461g": "THE MORE YOU LOOK",
+              "bslcx4LRFL0": "LOVE IN EVERY WORD",
+              "KGkWFuk9xUE": "CUPCAKE FOR VAL",
+              "SGrr4E_morA": "OGECHI",
+              "Slxm189-MXk": "MERRY SIDE OF YOU",
+              "TMAIfS7e4A4": "INGRATE",
+              "fkLopgVOZYk": "SEASONED WITH LOVE",
+              "X3FqKX8fAKw": "LOVE, STYLE AND OTHER THINGS",
+              "DxFfuEh7QCc": "BETTING ON LOVE",
+              "BIuA4dY_4ck": "ENTANGLED",
+              "zAHTpj04pUI": "A CASE FOR THE HEART"
+          }
+
+          genre_map = {
+              "GrxitJ4fHT8": ["Drama"],
+              "DhTG5hSFUvw": ["Drama", "Thriller"],
+              "4L1xY-tSOCw": ["Drama", "Romance"],
+              "Ud1JUpJZZGQ": ["Romance", "Drama"],
+              "o1TNBdyrUbY": ["Romance", "Drama"],
+              "srH_cKp_9CQ": ["Drama", "Thriller"],
+              "T4rIpXveUxM": ["Romance", "Drama"],
+              "3oKgYl34ES4": ["Romance", "Drama"],
+              "1Euf5dSqdrY": ["Drama", "Romance"],
+              "061B3-yAkSM": ["Romance", "Drama"],
+              "gP8wqJbM7_g": ["Romance", "Comedy"],
+              "-r63J6ZtnB8": ["Romance", "Drama"],
+              "1RgvumvDiM8": ["Drama", "Romance"],
+              "HiGnOF8B9s0": ["Romance", "Drama"],
+              "VooG7LMBMak": ["Romance", "Comedy"],
+              "nNBISa5Znc0": ["Drama", "Romance"],
+              "FRsfW3cpi-c": ["Comedy", "Drama"],
+              "_uqFACWPpDg": ["Drama"],
+              "eF_SNXUtAOs": ["Drama"],
+              "OQQaDqLCgKg": ["Romance", "Drama"],
+              "YxSkTZ756Yc": ["Romance", "Drama"],
+              "nPpy24gr12M": ["Drama", "Thriller"],
+              "0KSSYOa2Lvw": ["Romance", "Drama"],
+              "htzdkMPBq1g": ["Romance", "Drama"],
+              "G12jLjOusAs": ["Drama", "Thriller"],
+              "Ps9nVGyQJdA": ["Drama", "Romance"],
+              "go7D8Egeyu0": ["Romance", "Comedy"],
+              "rY92l-9ITx4": ["Drama", "Thriller"],
+              "RMIGESdOEKU": ["Romance", "Comedy"],
+              "lAve8eRTUuI": ["Romance", "Thriller"],
+              "BHJQYbd88hc": ["Thriller", "Drama"],
+              "9zpYWyDRigI": ["Romance", "Drama"],
+              "neFmomPVpug": ["Drama"],
+              "1wx57M0Y4pQ": ["Thriller", "Drama"],
+              "OhAefewxC4o": ["Romance", "Drama"],
+              "GwwLna5zxpk": ["Thriller", "Drama"],
+              "TTxt0QhaMTo": ["Drama", "Thriller"],
+              "FKxZ_h8461g": ["Thriller", "Drama"],
+              "bslcx4LRFL0": ["Romance", "Drama"],
+              "KGkWFuk9xUE": ["Romance", "Comedy"],
+              "SGrr4E_morA": ["Romance", "Drama"],
+              "Slxm189-MXk": ["Romance", "Comedy"],
+              "TMAIfS7e4A4": ["Drama"],
+              "fkLopgVOZYk": ["Romance", "Drama"],
+              "X3FqKX8fAKw": ["Romance", "Comedy"],
+              "DxFfuEh7QCc": ["Romance", "Comedy"],
+              "BIuA4dY_4ck": ["Romance", "Drama"],
+              "zAHTpj04pUI": ["Romance", "Drama"]
+          }
+
           items = []
           page_token = ""
 
@@ -38,7 +140,7 @@ jobs:
                   "part": "snippet,contentDetails",
                   "maxResults": "50",
                   "playlistId": playlist_id,
-                  "key": api_key,
+                  "key": api_key
               }
 
               if page_token:
@@ -53,129 +155,30 @@ jobs:
                   data = json.load(response)
 
               for i, item in enumerate(data.get("items", [])):
-    snippet = item.get("snippet", {})
-    content = item.get("contentDetails", {})
+                  snippet = item.get("snippet", {})
+                  content = item.get("contentDetails", {})
 
-    video_id = (
-        content.get("videoId")
-        or snippet.get("resourceId", {}).get("videoId", "")
-    )
+                  video_id = (
+                      content.get("videoId")
+                      or snippet.get("resourceId", {}).get("videoId", "")
+                  )
 
-    source_title = snippet.get("title", "Untitled").strip()
+                  source_title = snippet.get("title", "Untitled").strip()
 
-    if not video_id or source_title.lower() in {"private video", "deleted video"}:
-        continue
+                  if not video_id:
+                      continue
 
-    title_map = {
-        "GrxitJ4fHT8": "BOWALE",
-        "DhTG5hSFUvw": "LOST CONNECTION",
-        "4L1xY-tSOCw": "SECOND CHANCES",
-        "Ud1JUpJZZGQ": "KISS ME TOMORROW",
-        "o1TNBdyrUbY": "TO LOVE A WILLIAMS",
-        "srH_cKp_9CQ": "THE HOUSE MANAGER",
-        "T4rIpXveUxM": "MEADOWBROOK HEARTS: THE TRANSITION",
-        "3oKgYl34ES4": "THE ANCHOR",
-        "1Euf5dSqdrY": "A FLICKER OF US",
-        "061B3-yAkSM": "WITHOUT YOU",
-        "gP8wqJbM7_g": "SAME DIFFERENCE",
-        "-r63J6ZtnB8": "DOUBLE THE LOVE",
-        "1RgvumvDiM8": "LAST DIAL TO HEAVEN",
-        "HiGnOF8B9s0": "LOVE UNBROKEN",
-        "VooG7LMBMak": "A BRIDE FOR THE SEASON",
-        "nNBISa5Znc0": "WALLS BETWEEN US",
-        "FRsfW3cpi-c": "THREE FOR TROUBLE",
-        "_uqFACWPpDg": "THE GIFT WITHIN",
-        "eF_SNXUtAOs": "MIRACLE MAN",
-        "OQQaDqLCgKg": "LOVE IN EVERY WORD 2: THE WEDDING",
-        "YxSkTZ756Yc": "MEADOWBROOK HEARTS",
-        "nPpy24gr12M": "CHESS",
-        "0KSSYOa2Lvw": "ONE NIGHT ONLY",
-        "htzdkMPBq1g": "LOVE ASIDE",
-        "G12jLjOusAs": "THE PRICE WE PAY",
-        "Ps9nVGyQJdA": "THE GIFT",
-        "go7D8Egeyu0": "DRIVE ME TO LOVE",
-        "rY92l-9ITx4": "KARMA SAYS",
-        "RMIGESdOEKU": "TOO GOOD TO BE TRUE",
-        "lAve8eRTUuI": "TEMPTATION",
-        "BHJQYbd88hc": "WRONG DOOR",
-        "9zpYWyDRigI": "A COPY OF LOVE",
-        "neFmomPVpug": "WHISPERS OF THE WOMB",
-        "1wx57M0Y4pQ": "THE SILENT TRUTH",
-        "OhAefewxC4o": "FOR HIS LOVE",
-        "GwwLna5zxpk": "TWIN DECEPTION",
-        "TTxt0QhaMTo": "THE WORD",
-        "FKxZ_h8461g": "THE MORE YOU LOOK",
-        "bslcx4LRFL0": "LOVE IN EVERY WORD",
-        "KGkWFuk9xUE": "CUPCAKE FOR VAL",
-        "SGrr4E_morA": "OGECHI",
-        "Slxm189-MXk": "MERRY SIDE OF YOU",
-        "TMAIfS7e4A4": "INGRATE",
-        "fkLopgVOZYk": "SEASONED WITH LOVE",
-        "X3FqKX8fAKw": "LOVE, STYLE AND OTHER THINGS",
-        "DxFfuEh7QCc": "BETTING ON LOVE",
-        "BIuA4dY_4ck": "ENTANGLED",
-        "zAHTpj04pUI": "A CASE FOR THE HEART"
-    }
+                  if source_title.lower() in {"private video", "deleted video"}:
+                      continue
 
-    genre_map = {
-        "GrxitJ4fHT8": ["Drama"],
-        "DhTG5hSFUvw": ["Drama", "Thriller"],
-        "4L1xY-tSOCw": ["Drama", "Romance"],
-        "Ud1JUpJZZGQ": ["Romance", "Drama"],
-        "o1TNBdyrUbY": ["Romance", "Drama"],
-        "srH_cKp_9CQ": ["Drama", "Thriller"],
-        "T4rIpXveUxM": ["Romance", "Drama"],
-        "3oKgYl34ES4": ["Romance", "Drama"],
-        "1Euf5dSqdrY": ["Drama", "Romance"],
-        "061B3-yAkSM": ["Romance", "Drama"],
-        "gP8wqJbM7_g": ["Romance", "Comedy"],
-        "-r63J6ZtnB8": ["Romance", "Drama"],
-        "1RgvumvDiM8": ["Drama", "Romance"],
-        "HiGnOF8B9s0": ["Romance", "Drama"],
-        "VooG7LMBMak": ["Romance", "Comedy"],
-        "nNBISa5Znc0": ["Drama", "Romance"],
-        "FRsfW3cpi-c": ["Comedy", "Drama"],
-        "_uqFACWPpDg": ["Drama"],
-        "eF_SNXUtAOs": ["Drama"],
-        "OQQaDqLCgKg": ["Romance", "Drama"],
-        "YxSkTZ756Yc": ["Romance", "Drama"],
-        "nPpy24gr12M": ["Drama", "Thriller"],
-        "0KSSYOa2Lvw": ["Romance", "Drama"],
-        "htzdkMPBq1g": ["Romance", "Drama"],
-        "G12jLjOusAs": ["Drama", "Thriller"],
-        "Ps9nVGyQJdA": ["Drama", "Romance"],
-        "go7D8Egeyu0": ["Romance", "Comedy"],
-        "rY92l-9ITx4": ["Drama", "Thriller"],
-        "RMIGESdOEKU": ["Romance", "Comedy"],
-        "lAve8eRTUuI": ["Romance", "Thriller"],
-        "BHJQYbd88hc": ["Thriller", "Drama"],
-        "9zpYWyDRigI": ["Romance", "Drama"],
-        "neFmomPVpug": ["Drama"],
-        "1wx57M0Y4pQ": ["Thriller", "Drama"],
-        "OhAefewxC4o": ["Romance", "Drama"],
-        "GwwLna5zxpk": ["Thriller", "Drama"],
-        "TTxt0QhaMTo": ["Drama", "Thriller"],
-        "FKxZ_h8461g": ["Thriller", "Drama"],
-        "bslcx4LRFL0": ["Romance", "Drama"],
-        "KGkWFuk9xUE": ["Romance", "Comedy"],
-        "SGrr4E_morA": ["Romance", "Drama"],
-        "Slxm189-MXk": ["Romance", "Comedy"],
-        "TMAIfS7e4A4": ["Drama"],
-        "fkLopgVOZYk": ["Romance", "Drama"],
-        "X3FqKX8fAKw": ["Romance", "Comedy"],
-        "DxFfuEh7QCc": ["Romance", "Comedy"],
-        "BIuA4dY_4ck": ["Romance", "Drama"],
-        "zAHTpj04pUI": ["Romance", "Drama"]
-    }
-
-    items.append({
-        "title": title_map.get(video_id, source_title),
-        "sourceTitle": source_title,
-        "videoId": video_id,
-        "position": snippet.get("position", i),
-        "addedAt": snippet.get("publishedAt", ""),
-        "genres": genre_map.get(video_id, ["Drama"])
-    })
+                  items.append({
+                      "title": title_map.get(video_id, source_title),
+                      "sourceTitle": source_title,
+                      "videoId": video_id,
+                      "position": snippet.get("position", i),
+                      "addedAt": snippet.get("publishedAt", ""),
+                      "genres": genre_map.get(video_id, ["Drama"])
+                  })
 
               page_token = data.get("nextPageToken", "")
 
@@ -184,16 +187,21 @@ jobs:
 
           items.sort(key=lambda x: x["position"])
 
+          if not items:
+              raise RuntimeError("No valid movies were returned. Keeping existing catalogue.")
+
           os.makedirs("data", exist_ok=True)
+
+          new_catalogue = {
+              "playlistId": playlist_id,
+              "source": "BammybestowedTV",
+              "updatedAt": datetime.now(timezone.utc).isoformat(),
+              "items": items
+          }
 
           with open("data/catalogue.json", "w", encoding="utf-8") as f:
               json.dump(
-                  {
-                      "playlistId": playlist_id,
-                      "source": "BammybestowedTV",
-                      "updatedAt": datetime.now(timezone.utc).isoformat(),
-                      "items": items
-                  },
+                  new_catalogue,
                   f,
                   ensure_ascii=False,
                   indent=2
