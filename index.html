@@ -296,48 +296,29 @@ function filters(){
  document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{active=b.dataset.f;filters();render();});
 }
 async function loadLive(){
- const apiStatus=document.getElementById("bgcApiStatus");
- const input=document.getElementById("bgcApiKey");
- const key=((input?.value||localStorage.getItem("bgc_youtube_api_key")||"").trim());
- if(apiStatus) apiStatus.innerHTML=key ? `Connecting to ${BAMMY_BRAND()} playlist…` : "API key not connected yet.";
- document.getElementById("status").innerHTML=`Connecting to the ${BAMMY_BRAND()} playlist…`;
- if(!key){
-   items=FALLBACK.map(x=>({...x}));
-   document.getElementById("status").innerHTML="Playlist source: <b>BammybestowedTV</b> • Saved catalogue shown. Enter your YouTube API key above to connect the live playlist.";
-   filters();render();return;
- }
- localStorage.setItem("bgc_youtube_api_key",key);
- if(input) input.value=key;
- let pageToken="";
- const out=[];
- try{
-   do{
-     const url=new URL("https://www.googleapis.com/youtube/v3/playlistItems");
-     url.searchParams.set("part","snippet,contentDetails");
-     url.searchParams.set("maxResults","50");
-     url.searchParams.set("playlistId",PLAYLIST_ID);
-     url.searchParams.set("key",key);
-     if(pageToken) url.searchParams.set("pageToken",pageToken);
-     const r=await fetch(url.toString());
-     const d=await r.json();
-     if(!r.ok || d.error) throw new Error(d?.error?.message || `YouTube API error ${r.status}`);
-     (d.items||[]).forEach((v,i)=>{
-       const title=v.snippet?.title||"Untitled";
-       const vid=v.contentDetails?.videoId||v.snippet?.resourceId?.videoId||"";
-       if(vid) out.push({title,videoId:vid,genres:classify(title),position:v.snippet?.position??i,addedAt:v.snippet?.publishedAt||""});
-     });
-     pageToken=d.nextPageToken||"";
-   }while(pageToken);
-   items=out.sort((a,b)=>a.position-b.position);
-   document.getElementById("status").innerHTML=`Live playlist connected: ${BAMMY_BRAND()} • ${items.length} movie(s) loaded.`;
-   if(apiStatus) apiStatus.innerHTML=`Connected ✓ ${items.length} playlist movie${items.length===1?"":"s"} loaded from ${BAMMY_BRAND()}.`;
- }catch(e){
-   items=FALLBACK.map(x=>({...x}));
-   const msg=String(e?.message||e);
-   document.getElementById("status").innerHTML="Live playlist connection failed, so the saved catalogue is being shown. " + esc(msg);
-   if(apiStatus) apiStatus.textContent="Could not load the playlist: " + msg;
- }
- filters();render();
+  try{
+    const r = await fetch("data/catalogue.json?ts=" + Date.now());
+    if(!r.ok) throw new Error("Could not load catalogue");
+
+    const d = await r.json();
+
+    items = d.items || [];
+
+    document.getElementById("status").innerHTML =
+      `Live playlist connected: <strong>🔴 BammybestowedTV</strong> · ${items.length} movie(s) loaded.`;
+
+    filters();
+    render();
+
+  }catch(e){
+    items = FALLBACK.map(x => ({...x}));
+
+    document.getElementById("status").textContent =
+      "Live catalogue unavailable. Showing saved movies.";
+
+    filters();
+    render();
+  }
 }
 document.getElementById("search").addEventListener("input",render);
 document.getElementById("refresh").addEventListener("click",loadLive);
