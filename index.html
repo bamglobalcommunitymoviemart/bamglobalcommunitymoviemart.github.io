@@ -313,9 +313,7 @@ async function loadLive(){
   }catch(e){
     items = FALLBACK.map(x => ({...x}));
 
-    document.getElementById("status").textContent =
-      "Live catalogue unavailable. Showing saved movies.";
-
+    document.getElementById("status").textContent = "ERROR: " + e.message;
     filters();
     render();
   }
