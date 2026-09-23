@@ -291,7 +291,7 @@ function render(){
   grid.innerHTML=list.map(x=>`<article class="card"><div class="poster">${x.videoId?`<img src="${thumb(x.videoId)}" alt="${esc(x.title)}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">`:''}<div class="ph" style="${x.videoId?'display:none':''}">Poster will be added from supplied artwork</div></div><div class="body"><div class="title">${esc(x.title)}</div><div class="meta">${esc(x.genres.join(" • "))} • FREE ON YOUTUBE</div><button class="watch" onclick="window.open('${watch(x.videoId)}','_blank')">WATCH NOW</button></div></article>`).join("");
 }
 function filters(){
- const fs=["ALL MOVIES","NEW RELEASES","BGC PICKS","ROMANCE","DRAMA","COMEDY","THRILLER","FAMILY"];
+ const fs=["ALL MOVIES","NEW RELEASES","BGC PICKS","ROMANCE","DRAMA","THRILLER"];
  document.getElementById("filters").innerHTML=fs.map(x=>`<button class="${active===x?'active':''}" data-f="${x}">${x}</button>`).join("");
  document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{active=b.dataset.f;filters();render();});
 }
