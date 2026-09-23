@@ -1,0 +1,101 @@
+name: Update YouTube Movie Catalogue
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-catalogue:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Fetch BammybestowedTV playlist
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.parse
+          import urllib.request
+          from datetime import datetime, timezone
+
+          playlist_id = "PL_YIUdubpCx2VlRuA42PSEv6G_siiP4Df"
+          api_key = os.environ["YOUTUBE_API_KEY"]
+
+          items = []
+          page_token = ""
+
+          while True:
+              params = {
+                  "part": "snippet,contentDetails",
+                  "maxResults": "50",
+                  "playlistId": playlist_id,
+                  "key": api_key,
+              }
+
+              if page_token:
+                  params["pageToken"] = page_token
+
+              url = (
+                  "https://www.googleapis.com/youtube/v3/playlistItems?"
+                  + urllib.parse.urlencode(params)
+              )
+
+              with urllib.request.urlopen(url) as response:
+                  data = json.load(response)
+
+              for i, item in enumerate(data.get("items", [])):
+                  snippet = item.get("snippet", {})
+                  content = item.get("contentDetails", {})
+
+                  video_id = (
+                      content.get("videoId")
+                      or snippet.get("resourceId", {}).get("videoId", "")
+                  )
+
+                  if video_id:
+                      items.append({
+                          "title": snippet.get("title", "Untitled"),
+                          "videoId": video_id,
+                          "position": snippet.get("position", i),
+                          "addedAt": snippet.get("publishedAt", "")
+                      })
+
+              page_token = data.get("nextPageToken", "")
+
+              if not page_token:
+                  break
+
+          items.sort(key=lambda x: x["position"])
+
+          os.makedirs("data", exist_ok=True)
+
+          with open("data/catalogue.json", "w", encoding="utf-8") as f:
+              json.dump(
+                  {
+                      "playlistId": playlist_id,
+                      "source": "BammybestowedTV",
+                      "updatedAt": datetime.now(timezone.utc).isoformat(),
+                      "items": items
+                  },
+                  f,
+                  ensure_ascii=False,
+                  indent=2
+              )
+          PY
+
+      - name: Commit catalogue if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/catalogue.json
+          git diff --cached --quiet || git commit -m "Update BammybestowedTV movie catalogue"
+          git push
