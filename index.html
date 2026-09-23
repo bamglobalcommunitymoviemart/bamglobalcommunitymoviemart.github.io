@@ -284,7 +284,7 @@ function render(){
   let list=items.filter(x=>!q || x.title.toLowerCase().includes(q));
   if(active==="NEW RELEASES") list=list.slice(0,13);
   else if(active==="BGC PICKS") list=list.filter(x=>PICKS.some(p=>p.toLowerCase()===x.title.toLowerCase()));
-  else if(active!=="ALL MOVIES") list=list.filter(x=>x.genres.includes(active));
+  else if(active!=="ALL MOVIES") list=list.filter(x=>(x.genres||[]).some(g=>String(g).toUpperCase()===active));
   document.getElementById("count").textContent=`(${list.length})`;
   const grid=document.getElementById("grid");
   if(!list.length){grid.innerHTML='<div class="empty">No movies found.</div>';return;}
